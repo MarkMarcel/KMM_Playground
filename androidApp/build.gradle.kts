@@ -11,17 +11,27 @@ dependencies {
 }
 
 android {
-    compileSdkVersion(30)
-    defaultConfig {
-        applicationId = "com.stackconstruct.kmmplayground.android"
-        minSdkVersion(21)
-        targetSdkVersion(30)
-        versionCode = 1
-        versionName = "1.0"
+    compileOptions {
+
     }
+
+    compileSdk = 30
+
+    buildFeatures {
+        compose = true
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
         }
+    }
+
+    defaultConfig {
+        applicationId = "com.stackconstruct.kmmplayground.android"
+        minSdk = 21
+        targetSdk = 30
+        versionCode = 1
+        versionName = "1.0"
     }
 }
