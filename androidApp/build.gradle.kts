@@ -59,4 +59,13 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    packagingOptions {
+        packagingOptions {
+            resources {
+                excludes.add("META-INF/AL2.0")
+                excludes.add("META-INF/LGPL2.1")
+            }
+        }
+    }
 }
