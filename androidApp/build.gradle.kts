@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     kotlin("android")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 dependencies {
@@ -19,6 +20,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.0")
     implementation("com.google.android.material:material:1.4.0")
+    //Google Maps Play Services
+    implementation("com.google.android.libraries.maps:maps:3.1.0-beta")
     implementation(project(":shared"))
 }
 
