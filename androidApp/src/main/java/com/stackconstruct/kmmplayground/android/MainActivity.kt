@@ -30,16 +30,86 @@ import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.OnMapReadyCallback
 import com.google.android.libraries.maps.SupportMapFragment
+import com.google.android.libraries.maps.model.*
 import com.stackconstruct.kmmplayground.Greeting
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 data class OSAndVersion(val os: String, val version: String)
 
 
 fun greet(): String {
     return Greeting().greeting()
+}
+
+object GoogleMapsService {
+    //Keeping tract of host lifecycle
+    private val accra = LatLng(5.6037, 0.1870)
+    private val lome = LatLng(6.1256, 1.2254)
+    private val cameraTarget: MutableStateFlow<LatLng?> = MutableStateFlow(null)
+    private val coroutineScope = MainScope()
+    private var marker: Marker? = null
+    private lateinit var _map: GoogleMap
+    private lateinit var _mapView: MapView
+    private var polyline: Polyline? = null
+
+    private object CameraMoveListener : GoogleMap.OnCameraMoveListener {
+        override fun onCameraMove() {
+            coroutineScope.launch { cameraTarget.emit(_map.cameraPosition.target) }
+        }
+    }
+
+    fun onCreate(mapView: MapView, savedInstanceState: Bundle?) {
+        _mapView = mapView
+        initGoogleMap(savedInstanceState)
+    }
+
+    fun onDestroy() {
+        coroutineScope.cancel()
+        _mapView.onDestroy()
+    }
+
+    fun onPause(){
+        _mapView.onPause()
+    }
+
+    private fun initGoogleMap(savedInstanceState: Bundle?) {
+        _mapView.onCreate(savedInstanceState)
+        _mapView.getMapAsync {
+            _map = it
+            _map.addMarker(MarkerOptions().position(accra))
+            _map.setOnCameraMoveListener(CameraMoveListener)
+            observeCameraTargetChanges()
+        }
+    }
+
+    private fun observeCameraTargetChanges() {
+        coroutineScope.launch {
+            cameraTarget.collect {
+                it?.let {
+                    if (polyline != null) {
+                        polyline!!.points = listOf(accra, lome, it)
+                    } else {
+                        val options = PolylineOptions().add(accra, lome, it)
+                        polyline = _map.addPolyline(options).apply {
+                            endCap =
+                                CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.ic_stat_name))
+                        }
+                    }
+
+                    /* if(marker != null){
+                         marker!!.position = it
+                     }else{
+                         marker = _map.addMarker(MarkerOptions().position(it))
+                     }*/
+                }
+            }
+        }
+    }
 }
 
 //Do not forget handling lifecycle events during the use of a feature
@@ -58,17 +128,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             setContentView(FragmentContainerView(this))
-            addMapFragment()
+            addMapFragment(Bundle())
         }
     }
 
-    private fun addMapFragment() {
-        val mapView = SupportMapFragment.newInstance()
-        supportFragmentManager
-            .beginTransaction()
-            .add(mapView, "map")
-            .commitNow()
-        mapView.getMapAsync(MapState)
+    override fun onDestroy() {
+        GoogleMapsService.onDestroy()
+        super.onDestroy()
+    }
+
+    override fun onPause() {
+        GoogleMapsService.onPause()
+        super.onPause()
+    }
+
+    private fun addMapFragment(savedInstanceState: Bundle?) {
+        val mapView = MapView(this)
+        GoogleMapsService.onCreate(mapView, savedInstanceState)
+        setContentView(mapView)
     }
 
 }

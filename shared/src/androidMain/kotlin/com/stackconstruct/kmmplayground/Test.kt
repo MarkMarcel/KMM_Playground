@@ -1,9 +1,8 @@
 package com.stackconstruct.kmmplayground
 
-import arrow.core.Either
-import arrow.core.right
+import android.app.Activity
 
-class Test {
+class Test:Activity() {
     /*fun test():Either<Exception,Unit>{
         return right()
     }*/
