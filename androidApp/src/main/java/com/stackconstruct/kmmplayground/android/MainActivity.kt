@@ -46,7 +46,7 @@ fun greet(): String {
     return Greeting().greeting()
 }
 
-object GoogleMapsService {
+object GoogleMapsServic {
     //Keeping tract of host lifecycle
     private val accra = LatLng(5.6037, 0.1870)
     private val lome = LatLng(6.1256, 1.2254)
