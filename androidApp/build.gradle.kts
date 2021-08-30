@@ -5,8 +5,9 @@ plugins {
 }
 
 dependencies {
+    val composeVersion = "1.3.1"
     //Integration of compose with activities
-    implementation("androidx.activity:activity-compose:1.3.1")
+    implementation("androidx.activity:activity-compose:$composeVersion")
     //Animation support for compose
     implementation("androidx.compose.animation:animation:1.0.1")
     //Material Design support for compose

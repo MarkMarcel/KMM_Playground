@@ -1,9 +1,7 @@
 package com.stackconstruct.kmmplayground.android
 
 import android.os.Bundle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
@@ -39,10 +37,7 @@ class GoogleMapsService(private val lifecycleOwner: LifecycleOwner, private val 
         mapState = savedInstanceState ?: Bundle()
         view.onCreate(mapState)
         getMap()
-    }
-
-    fun onDestroy(){
-        serviceScope.cancel()
+        syncMapViewWithOwner()
     }
 
     private fun getMap(){
@@ -61,5 +56,25 @@ class GoogleMapsService(private val lifecycleOwner: LifecycleOwner, private val 
         map.setOnCameraMoveListener {
             _mapCenter.value = map.cameraPosition.target
         }
+    }
+
+    private fun syncMapViewWithOwner(){
+        val lifecycleObserver = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> { }
+                Lifecycle.Event.ON_START -> view.onStart()
+                Lifecycle.Event.ON_RESUME -> view.onResume()
+                Lifecycle.Event.ON_PAUSE -> view.onPause()
+                Lifecycle.Event.ON_STOP -> view.onStop()
+                Lifecycle.Event.ON_DESTROY -> onDestroy()
+                else -> throw IllegalStateException()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+    }
+
+    private fun onDestroy(){
+        serviceScope.cancel()
+        view.onDestroy()
     }
 }

@@ -2,6 +2,7 @@ package com.stackconstruct.kmmplayground.android
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.libraries.maps.model.LatLng
 
 class CreatePolylineViewModel(initialFolder:Map<String,String>):ViewModel() {
@@ -40,5 +41,12 @@ class CreatePolylineViewModel(initialFolder:Map<String,String>):ViewModel() {
 
     private fun setRemovePointEnabled(){
         removePointEnabled = currentIndex > 0
+    }
+
+    class CreatePolylineViewModelFactory(val initialFolder:Map<String,String>):ViewModelProvider.Factory{
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return CreatePolylineViewModel(initialFolder) as T
+        }
+
     }
 }
